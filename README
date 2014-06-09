@@ -1,0 +1,16 @@
+The scrapper classes are in interface.js.
+
+Scrapping supported websites
+-Magento Websites
+-Demandware Websites
+-ATGCommerce Websites
+-Amazon
+-Best Buy
+-Target
+-Walmart
+
+Unit testing script is under nodejs folder.
+It test dom structure of the websites whether it is compatible or not with the current script. Currently it only checks with only price for dom structure change.
+
+I used grant command to run unit testing
+"grant test"
