@@ -21,6 +21,6 @@
     "grunt-karma": "~0.8.2",
     "grunt-mocha-test": "~0.10.2",
     "xmldom": "~0.1.19",
-    "cheerio": "~0.0.0"
+    "cheerio": "~0.13.0"
   }
 }
