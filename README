@@ -14,3 +14,6 @@ It test dom structure of the websites whether it is compatible or not with the c
 
 I used grunt command to run unit testing
 "grunt test"
+
+Browser Extension is inside extension folder.
+Install crx file in chrome in developer mode to test out.

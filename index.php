@@ -13,6 +13,8 @@ For the purpsoses of testing we have three urls that we want you to extract data
 'www.walmart.com/ip/West-Bend-0.9-cu.-ft.-900-Watt-Microwave/24950645'<br>
 'www.petermillar.com/men/men-collections/new-arrivals/plaid-justice-sport-coat-italian-wool-blend.html'<br>
 <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="//www.parsecdn.com/js/parse-1.2.18.min.js"></script>
+<script src="detectstore.js"></script>
 <script src="interface.js"></script>
 <div id="result">
 
