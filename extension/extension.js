@@ -57,26 +57,29 @@ appAPI.ready(function($) {
             productName: product_info['product_name'],
             currentPrice: product_info['current_price']*1,
             productID: product_info['id'],
-            SKU: product_info['sku'],
-            productImages: product_info['images']
+            SKU: product_info['sku']
         }).then(function(object) {
                 console.log(object);
                 //save images
                 for (var i =0; i<product_info['images'].length; i++){
                     var ext = product_info['images'][i].substr(product_info['images'][i].length-3).toLowerCase();
-                    convertImgToBase64(product_info['images'][i], function(base64Img){
+                    convertImgToBase64(product_info['images'][i], function(base64Img, base64Thumb){
                         var file = new Parse.File(storeParser.store+'_'+product_info['id']+'_'+i+'.'+ext, { base64: base64Img });
-                        file.save().then(function(data){
-                            var imgobj = new ProductImage();
-                            imgobj.set("image", file);
+                        var filethumb = new Parse.File(storeParser.store+'_'+product_info['id']+'_'+i+'_thumb.'+ext, { base64: base64Thumb });
+                        filethumb.save().then(function(data){
+                            file.save().then(function(data){
+                                var imgobj = new ProductImage();
+                                imgobj.set("image", file);
+                                imgobj.set("thumb", filethumb);
+                                //set relation to product
+                                imgobj.set("parent", object);
+                                imgobj.save();
+                                console.log(imgobj);
+                            }, function(error){
+                                console.log(error);
+                            })
+                        });
 
-                            //set relation to product
-                            imgobj.set("parent", object);
-                            imgobj.save();
-                            console.log(imgobj);
-                        }, function(error){
-                            console.log(error);
-                        })
                     });
                 }
             });

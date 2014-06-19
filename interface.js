@@ -1,34 +1,3 @@
-
-//sniffs the dom for the store type.
-//would return null or BestBuyParser or WalmartParser or MagentoParser
-function detectStore(dom) {
-    var site_name = $(dom).find('meta[property="og:site_name"]')!=undefined ? $(dom).find('meta[property="og:site_name"]').attr('content') : null;
-    if (site_name == null) {
-        if (/Mage\.Cookies\.domain/.test($(dom).text())) site_name = "Magento";
-        if (/Amazon\.com/.test($(dom).find('.nav_last').text())) site_name = "Amazon";
-        if ($(dom).find('link[rel^="shortcut"]') && (/demandware/.test($(dom).find('link[rel^="shortcut"]').attr('href')))) site_name = "Demandware";
-        if ($(dom).find("input[name^=\"\/atg\/commerce\"]").length>0) site_name = "ATGCommerce";
-    }
-    switch (site_name){
-        case 'Walmart.com':
-            return new WalmartParser();
-        case 'Best Buy':
-            return new BestBuyParser();
-        case 'Magento':
-            return new MagentoParser();
-        case 'Target':
-            return new TargetParser();
-        case 'Amazon':
-            return new AmazonParser();
-        case 'Demandware':
-            return new DemandwareParser();
-        case 'ATGCommerce':
-            return new ATGCommerceParser();
-        default:  //magento
-            return null;
-    }
-}
-
 TEST_URLS=[
     'www.bestbuy.com/site/seiki-32-class-32-diag--lcd-tv-1080p-hdtv-1080p/1305459296.p',
     'www.walmart.com/ip/West-Bend-0.9-cu.-ft.-900-Watt-Microwave/24950645',
@@ -46,30 +15,6 @@ TEST_URLS=[
     'www.hollandandbarrett.com/shop/product/vitabiotics-perfectil-max-capsules-60012089'
 
 ]
-
-//loads image and set data into base64 format
-function convertImgToBase64(url, callback){
-    var canvas = document.createElement('CANVAS');
-    var ctx = canvas.getContext('2d');
-    var img = new Image;
-    var ext = url.substr(url.length-3).toLowerCase();
-    var outputFormat;
-    if (ext == 'jpg') outputFormat = 'image/jpeg';
-    if (ext == 'png') outputFormat = 'image/png';
-    img.crossOrigin = 'Anonymous';
-    img.onload = function(){
-        canvas.height = img.height;
-        canvas.width = img.width;
-        ctx.drawImage(img,0,0);
-        var dataURL = canvas.toDataURL(outputFormat);
-        callback.call(this, dataURL);
-        // Clean up
-        canvas = null;
-    };
-    if (url.substr(0,7) == 'http://') url = 'http://toneproxy.appspot.com/' + url.substr(7);
-    if (url.substr(0,8) == 'https://') url = 'http://toneproxy.appspot.com/' + url.substr(8);
-    img.src = url;
-}
 
 function loadDOMForUrl(url) {
     var orginial_url = url;

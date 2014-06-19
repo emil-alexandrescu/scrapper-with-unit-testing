@@ -63,7 +63,7 @@ function WalmartParser() {
         product_info['current_price'] = $(dom).text().match(/currentItemPrice:[\s]*([\d\.]+)/)[1];
         product_info['id'] = $(dom).text().match(/itemId:[\s]*([\d\.]+)/)[1];
         product_info['images'] = [];
-        if ($(dom).find('.BoxSelection').length == 0){
+        if ($(dom).find('.BoxSelection').length === 0){
             product_info['images'][0] = $(dom).find('img#mainImage').attr('src');
         }else{
             $(dom).find('.BoxSelection').each(function(index){
@@ -101,7 +101,7 @@ function MagentoParser() {
 
         product_info['images'] = [];
         $(dom).find('div.more-views a').each(function(index){
-            product_info['images'][index] = "http://" + $(this).attr('href').substr(1);
+            product_info['images'][index] = $(this).attr('href');
         });
         console.log(product_info);
         return product_info;
@@ -179,7 +179,7 @@ function TargetParser() {
 
         product_info['images'] = [];
         $(dom).find('a.scene7.imgAnchor img').each(function(index){
-            product_info['images'][index] = "http://" + $(this).attr('src').replace('_50x50', '').substr(1);
+            product_info['images'][index] = $(this).attr('src').replace('_50x50', '');
         });
         console.log(product_info);
         return product_info;
@@ -201,18 +201,18 @@ function DemandwareParser() {
         product_info['current_price'] = $(dom).find('.product-price').find('span[class^=price-]').text().match(/[\d\.]+/)[0];
 
         product_info['id'] = $(dom).find('span[itemprop="productID"]').text();
-        if (!product_info['id'])
+        if (!product_info['id']){
             product_info['id'] = $(dom).text().match(/productid[\s]*=[\s]*"([\d\w\-]+)"/i)[1];
-        else
+        } else{
             product_info['id'] = product_info['id'].match(/[\d\w\-_]+/)[0];
-
+        }
         product_info['sku'] = product_info['id'];
 
         product_info['images'] = [];
         $(dom).find('div.product-thumbnails li.thumb a').each(function(index){
-            if ($(this).attr('href').indexOf('#') == -1)
-                product_info['images'].push("http://" + $(this).attr('href').substr(1));
-
+            if ($(this).attr('href').indexOf('#') === -1){
+                product_info['images'].push($(this).attr('href'));
+            }
         });
         console.log(product_info);
         return product_info;
@@ -230,11 +230,11 @@ function ATGCommerceParser() {
         var product_info = {};
 
         var product_name_el = $(dom).find('h1[class*="title"]');
-        if (product_name_el.children().length == 0)
+        if (product_name_el.children().length === 0){
             product_info['product_name'] = product_name_el.text().trim();
-        else
+        }else{
             product_info['product_name'] = product_name_el.children().eq(0).text().trim();
-
+        }
         $(dom).find("[class$='-price']").each(function(){
             if (m = $(this).text().match(/([\d]+\.[\d]+)|([\d]+)/)){
                 product_info['current_price'] = m[0];
@@ -245,22 +245,23 @@ function ATGCommerceParser() {
         var product_id_el = $(dom).find('input').filter(function() {
 
             var str = $(this).attr('id') || $(this).attr('class');
-            if (str == null) return false;
+            if (str == null) {return false;}
             return (str.toLowerCase().indexOf('productid') > -1);
         });
         product_info['id'] = product_id_el.val();
 
         var product_sku_el = $(dom).find('input[type="hidden"]').filter(function() {
             var str = $(this).attr('id') || $(this).attr('class');
-            if (str == null) return false;
+            if (str == null) {return false;}
             return (str.toLowerCase().indexOf('skuid') > -1);
         });
         product_info['sku'] = product_sku_el.val();
 
         product_info['images'] = [];
         $(dom).find('[class*="thumb"] a').each(function(index){
-            if ($(this).attr('href').indexOf('#') == -1)
-                product_info['images'].push("http://" + $(this).attr('href').substr(1));
+            if ($(this).attr('href').indexOf('#') === -1){
+                product_info['images'].push($(this).attr('href'));
+            }
 
         });
         console.log(product_info);
@@ -279,12 +280,12 @@ function ATGCommerceParser() {
 //sniffs the dom for the store type.
 //would return null or BestBuyParser or WalmartParser or MagentoParser
 function detectStore(dom) {
-    var site_name = $(dom).find('meta[property="og:site_name"]')!=undefined ? $(dom).find('meta[property="og:site_name"]').attr('content') : null;
+    var site_name = $(dom).find('meta[property="og:site_name"]')!==undefined ? $(dom).find('meta[property="og:site_name"]').attr('content') : null;
     if (site_name == null) {
-        if (/Mage\.Cookies\.domain/.test($(dom).text())) site_name = "Magento";
-        if (/Amazon\.com/.test($(dom).find('.nav_last').text())) site_name = "Amazon";
-        if ($(dom).find('link[rel^="shortcut"]') && (/demandware/.test($(dom).find('link[rel^="shortcut"]').attr('href')))) site_name = "Demandware";
-        if ($(dom).find("input[name^=\"\/atg\/commerce\"]").length>0) site_name = "ATGCommerce";
+        if (/Mage\.Cookies\.domain/.test($(dom).text())) {site_name = "Magento";}
+        if (/Amazon\.com/.test($(dom).find('.nav_last').text())) {site_name = "Amazon";}
+        if ($(dom).find('link[rel^="shortcut"]') && (/demandware/.test($(dom).find('link[rel^="shortcut"]').attr('href')))) {site_name = "Demandware";}
+        if ($(dom).find("input[name^=\"\/atg\/commerce\"]").length>0) {site_name = "ATGCommerce";}
     }
     switch (site_name){
         case 'Walmart.com':
