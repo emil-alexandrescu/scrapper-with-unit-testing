@@ -3,13 +3,32 @@
  For more information please visit our docs site: http://docs.crossrider.com
  *************************************************************************************/
 
-
 appAPI.ready(function($) {
-    appAPI.resources.includeJS('detectstore.js');
-    appAPI.resources.includeJS('convertimage.js');
+    appAPI.resources.includeRemoteJS('http://cartbox.parseapp.com/src/common/addproduct/convertimage.js');
+    appAPI.resources.includeRemoteJS('http://cartbox.parseapp.com/src/common/addproduct/detectstore.js');
+    appAPI.resources.includeRemoteJS('http://cartbox.parseapp.com/src/common/addproduct/productsave.js');
     appAPI.resources.includeJS('toastr.min.js');
     appAPI.resources.includeCSS('toastr.min.css');
     appAPI.resources.includeRemoteJS('http://www.parsecdn.com/js/parse-1.2.18.min.js');
+    //pare initialize
+    Parse.initialize("YCV5ZQm2HBkJ3ugHCDwULH75Nb3NVanr3QscKXXE", "ChwfTXDXKo4UjoSYDbYNWtEFCmoEBraltnYUtVSc");
+
+    //detect user if possible
+    var currentuser = Parse.User.current();
+    if (currentuser){
+        appAPI.db.set("usertoken", currentuser._sessionToken);
+        console.log(currentuser._sessionToken);
+    }else{
+        token = appAPI.db.get("usertoken");
+        if (token){
+            Parse.User.become(token, {
+                success : function(user){
+                    currentuser = user;
+                    console.log(currentuser);
+                }
+            });
+        }
+    }
 
     var storeParser=detectStore(document);
     var product_info;
@@ -41,48 +60,36 @@ appAPI.ready(function($) {
         }
     }
     $('#add-to-cartbox').live('click', function(){
-        //pare initialize
-        Parse.initialize("YCV5ZQm2HBkJ3ugHCDwULH75Nb3NVanr3QscKXXE", "ChwfTXDXKo4UjoSYDbYNWtEFCmoEBraltnYUtVSc");
 
-        //declare classes
+
+        //check if the user is logged in
         var Product = Parse.Object.extend("Product");
         var ProductImage = Parse.Object.extend("ProductImage");
-        var url = document.location.href;
+        var User = Parse.Object.extend("User");
+        var userQuery = new Parse.Query(User);
+        //var currentuser = Parse.User.current();
 
-        //save product
-        var productobj = new Product();
-        productobj.save({
-            store: storeParser.store,
-            URL: url,
-            productName: product_info['product_name'],
-            currentPrice: product_info['current_price']*1,
-            productID: product_info['id'],
-            SKU: product_info['sku']
-        }).then(function(object) {
-                console.log(object);
-                //save images
-                for (var i =0; i<product_info['images'].length; i++){
-                    var ext = product_info['images'][i].substr(product_info['images'][i].length-3).toLowerCase();
-                    convertImgToBase64(product_info['images'][i], function(base64Img, base64Thumb){
-                        var file = new Parse.File(storeParser.store+'_'+product_info['id']+'_'+i+'.'+ext, { base64: base64Img });
-                        var filethumb = new Parse.File(storeParser.store+'_'+product_info['id']+'_'+i+'_thumb.'+ext, { base64: base64Thumb });
-                        filethumb.save().then(function(data){
-                            file.save().then(function(data){
-                                var imgobj = new ProductImage();
-                                imgobj.set("image", file);
-                                imgobj.set("thumb", filethumb);
-                                //set relation to product
-                                imgobj.set("parent", object);
-                                imgobj.save();
-                                console.log(imgobj);
-                            }, function(error){
-                                console.log(error);
-                            })
-                        });
+        if (currentuser != null && currentuser !=undefined){
+            console.log(currentuser);
+            console.log(currentuser.get("username"));
 
-                    });
+            userQuery.equalTo("username", currentuser.get("username"));
+            userQuery.count({
+                success:function(count){
+                    if (count === 0){
+                        alert("Please log in to add to cartbox");
+                        document.location.href = "http://cartbox.parseapp.com/#/signin";
+                        return;
+                    }else{
+                        var url = document.location.href;
+                        productSave(product_info, storeParser, url, currentuser );
+                    }
                 }
             });
+        }else{
+            alert("Please log in to add to cartbox");
+            document.location.href = "http://cartbox.parseapp.com/#/signin";
+            return;
+        }
     });
-
 });
